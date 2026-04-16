@@ -3,7 +3,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { pool } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,

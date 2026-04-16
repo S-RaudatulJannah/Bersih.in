@@ -1,31 +1,29 @@
 # Stage 1: Install dependencies and build
 FROM node:18-alpine AS builder
-# Enable Corepack and set Yarn if needed, but we use npm here
 WORKDIR /app
+
 COPY package.json package-lock.json* ./
-# Install all dependencies (termasuk devDependencies u/ build)
+# Install dependency 
 RUN npm install
 
 COPY . .
-# Update Prisma client
-RUN npx prisma generate
-# Build the Next.js app
+
+# Build aplikasi Next.js
 RUN npm run build
 
 # Stage 2: Production execution environment
 FROM node:18-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
+# Hanya copy file yang dibutuhkan untuk menjalankan aplikasi
 COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 3000
 
-# Running Next.js in production natively
+# Jalankan server bawaan Next.js
 CMD ["npm", "start"]
