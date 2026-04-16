@@ -1,21 +1,57 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Trash2, Eye, AlertCircle, Loader, CheckCircle, Clock, MapPin, User } from 'lucide-react'
+import { Trash2, Eye, AlertCircle, Loader, CheckCircle, Clock, MapPin, User, Zap, GripHorizontal } from 'lucide-react'
+
+type LaporanStatus = 'pending' | 'in-progress' | 'resolved'
 
 interface Laporan {
   id: number
   nama_pelapor: string
   lokasi: string
   tanggal_laporan: string
-  status: string
+  status: LaporanStatus
   foto_url?: string
 }
+
+interface StatusOption {
+  value: LaporanStatus
+  label: string
+  color: string
+  bgColor: string
+  icon: React.ReactNode
+}
+
+const STATUS_OPTIONS: StatusOption[] = [
+  {
+    value: 'pending',
+    label: 'Menunggu',
+    color: 'text-amber-800',
+    bgColor: 'bg-amber-100',
+    icon: <Clock className="w-3.5 h-3.5" />,
+  },
+  {
+    value: 'in-progress',
+    label: 'Diproses',
+    color: 'text-blue-800',
+    bgColor: 'bg-blue-100',
+    icon: <Zap className="w-3.5 h-3.5" />,
+  },
+  {
+    value: 'resolved',
+    label: 'Selesai',
+    color: 'text-emerald-800',
+    bgColor: 'bg-emerald-100',
+    icon: <CheckCircle className="w-3.5 h-3.5" />,
+  },
+]
 
 export function LaporanTable() {
   const [laporans, setLaporans] = useState<Laporan[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [statusModal, setStatusModal] = useState<{ id: number; isOpen: boolean }>({ id: 0, isOpen: false })
+  const [updatingId, setUpdatingId] = useState<number | null>(null)
 
   useEffect(() => {
     fetchLaporans()
@@ -36,15 +72,22 @@ export function LaporanTable() {
     }
   }
 
-  const handleUpdateStatus = async (id: number) => {
+  const handleUpdateStatus = async (id: number, newStatus: LaporanStatus) => {
     try {
+      setUpdatingId(id)
       const response = await fetch(`/api/laporan/${id}`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
       })
       if (!response.ok) throw new Error('Gagal mengubah status')
+      setStatusModal({ id: 0, isOpen: false })
       fetchLaporans()
     } catch (err) {
       console.error(err)
+      setError(err instanceof Error ? err.message : 'Gagal mengubah status')
+    } finally {
+      setUpdatingId(null)
     }
   }
 
@@ -59,6 +102,10 @@ export function LaporanTable() {
     } catch (err) {
       console.error(err)
     }
+  }
+
+  const getStatusOption = (status: LaporanStatus): StatusOption => {
+    return STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS[0]
   }
 
   return (

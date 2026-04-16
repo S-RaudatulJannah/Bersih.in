@@ -1,10 +1,6 @@
 import type { Metadata } from 'next'
 import { Header } from '@/components/Header'
-import export const metadata: Metadata = {
-  title: 'Bersih.in - Sistem Pelaporan Sampah Liar',  // ← Nama di sini
-  description: 'Platform modern untuk melaporkan dan mengelola sampah liar di lingkungan sekitar Anda',
-  keywords: ['sampah', 'lingkungan', 'pelaporan', 'kebersihan'],
-}'./globals.css'
+import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Bersih.in - Sistem Pelaporan Sampah Liar',
