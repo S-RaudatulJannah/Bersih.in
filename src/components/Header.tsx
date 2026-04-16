@@ -45,7 +45,7 @@ export function Header() {
             </div>
           </Link>
 
-          {/* Navigation */}
+          {/* Navigationn */}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map(({ href, label, icon: Icon }) => (
               <Link
