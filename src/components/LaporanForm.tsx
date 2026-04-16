@@ -1,51 +1,51 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Upload, AlertCircle, CheckCircle2, MapPin, User } from 'lucide-react'
+import { useState } from "react";
+import { Upload, AlertCircle, CheckCircle2, MapPin, User } from "lucide-react";
 
 interface LaporanFormProps {
-  onSuccess?: () => void
+  onSuccess?: () => void;
 }
 
 export function LaporanForm({ onSuccess }: LaporanFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-  const [fileName, setFileName] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-    setSuccess(false)
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setSuccess(false);
 
     try {
-      const formData = new FormData(e.currentTarget)
-      const response = await fetch('/api/laporan', {
-        method: 'POST',
+      const formData = new FormData(e.currentTarget);
+      const response = await fetch("/api/laporan", {
+        method: "POST",
         body: formData,
-      })
+      });
 
-      if (!response.ok) throw new Error('Gagal mengirim laporan')
+      if (!response.ok) throw new Error("Gagal mengirim laporan");
 
-      setSuccess(true)
-      setFileName(null)
-      ;(e.target as HTMLFormElement).reset()
-      setTimeout(() => setSuccess(false), 3000)
-      onSuccess?.()
+      setSuccess(true);
+      setFileName(null);
+      (e.target as HTMLFormElement).reset();
+      setTimeout(() => setSuccess(false), 3000);
+      onSuccess?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      setFileName(file.name)
+      setFileName(file.name);
     }
-  }
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-8 border border-dark-200">
@@ -56,14 +56,20 @@ export function LaporanForm({ onSuccess }: LaporanFormProps) {
             Laporkan Sampah Liar
           </h2>
         </div>
-        <p className="text-dark-600 ml-6">Bantu kami menjaga kebersihan lingkungan dengan melaporkan lokasi sampah</p>
+        <p className="text-dark-600 ml-6">
+          Bantu kami menjaga kebersihan lingkungan dengan melaporkan lokasi
+          sampah
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Nama Pelapor */}
           <div className="space-y-2">
-            <label htmlFor="nama" className="flex items-center gap-2 text-sm font-semibold text-dark-900">
+            <label
+              htmlFor="nama"
+              className="flex items-center gap-2 text-sm font-semibold text-dark-900"
+            >
               <User className="w-4 h-4 text-primary-700" />
               Nama Pelapor
             </label>
@@ -79,7 +85,10 @@ export function LaporanForm({ onSuccess }: LaporanFormProps) {
 
           {/* Lokasi */}
           <div className="space-y-2">
-            <label htmlFor="lokasi" className="flex items-center gap-2 text-sm font-semibold text-dark-900">
+            <label
+              htmlFor="lokasi"
+              className="flex items-center gap-2 text-sm font-semibold text-dark-900"
+            >
               <MapPin className="w-4 h-4 text-primary-700" />
               Lokasi Sampah
             </label>
@@ -94,11 +103,31 @@ export function LaporanForm({ onSuccess }: LaporanFormProps) {
           </div>
         </div>
 
+        {/* Deskripsi */}
+        <div className="space-y-2">
+          <label
+            htmlFor="deskripsi"
+            className="text-sm font-semibold text-dark-900"
+          >
+            Deskripsi Laporan (Opsional)
+          </label>
+          <textarea
+            id="deskripsi"
+            name="deskripsi"
+            rows={4}
+            placeholder="Detail tambahan (misal: sampah sudah menumpuk 3 hari...)"
+            className="w-full px-4 py-3 rounded-lg border border-dark-200 bg-white focus:border-primary-700 focus:ring-2 focus:ring-primary-700/10 outline-none transition-all placeholder:text-dark-400 resize-none"
+          ></textarea>
+        </div>
+
         {/* Foto */}
         <div className="space-y-2">
-          <label htmlFor="foto" className="flex items-center gap-2 text-sm font-semibold text-dark-900">
+          <label
+            htmlFor="foto"
+            className="flex items-center gap-2 text-sm font-semibold text-dark-900"
+          >
             <Upload className="w-4 h-4 text-primary-700" />
-            Foto Sampah (Opsional)
+            Foto Sampah (Wajib)
           </label>
           <div className="relative">
             <input
@@ -106,6 +135,7 @@ export function LaporanForm({ onSuccess }: LaporanFormProps) {
               name="foto"
               type="file"
               accept="image/*"
+              required
               onChange={handleFileChange}
               className="hidden"
             />
@@ -116,9 +146,13 @@ export function LaporanForm({ onSuccess }: LaporanFormProps) {
               <div className="text-center">
                 <Upload className="w-10 h-10 text-dark-400 mx-auto mb-3 group-hover:text-primary-700 transition-colors" />
                 <span className="text-sm font-medium text-dark-700">
-                  {fileName ? `📷 ${fileName}` : 'Klik untuk upload atau drag & drop'}
+                  {fileName
+                    ? `📷 ${fileName}`
+                    : "Klik untuk upload atau drag & drop"}
                 </span>
-                <span className="text-xs text-dark-500 mt-2 block">Max 16MB (JPG, PNG, GIF)</span>
+                <span className="text-xs text-dark-500 mt-2 block">
+                  Max 16MB (JPG, PNG, GIF)
+                </span>
               </div>
             </label>
           </div>
@@ -138,7 +172,9 @@ export function LaporanForm({ onSuccess }: LaporanFormProps) {
             <div className="w-5 h-5 bg-accent-green rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-white" />
             </div>
-            <p className="text-sm text-accent-green font-medium">Laporan berhasil dikirim! Terima kasih atas kontribusi Anda.</p>
+            <p className="text-sm text-accent-green font-medium">
+              Laporan berhasil dikirim! Terima kasih atas kontribusi Anda.
+            </p>
           </div>
         )}
 
@@ -154,10 +190,10 @@ export function LaporanForm({ onSuccess }: LaporanFormProps) {
               Mengirim...
             </span>
           ) : (
-            'Kirim Laporan'
+            "Kirim Laporan"
           )}
         </button>
       </form>
     </div>
-  )
+  );
 }

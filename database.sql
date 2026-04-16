@@ -1,0 +1,23 @@
+CREATE DATABASE IF NOT EXISTS bersihindb;
+USE bersihindb;
+
+CREATE TABLE User (
+    id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'USER',
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Laporan (
+    id VARCHAR(36) PRIMARY KEY,
+    nama_pelapor VARCHAR(255) NOT NULL,
+    lokasi VARCHAR(255) NOT NULL,
+    deskripsi TEXT,
+    foto_url VARCHAR(500) NOT NULL,
+    status VARCHAR(50) DEFAULT 'Menunggu',
+    userId VARCHAR(36),
+    tanggal_laporan DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE SET NULL
+);

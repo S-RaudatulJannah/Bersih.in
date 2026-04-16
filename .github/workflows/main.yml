@@ -1,0 +1,61 @@
+name: AWS EC2 CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main # Trigger workflow ketika push ke branch main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies & Prisma generate
+        run: |
+          npm install
+          npx prisma generate
+
+      # Jika Anda memiliki Docker registry (misal AWS ECR atau DockerHub),
+      # Anda bisa merakit image di sini dan push ke registry.
+      # Namun, pendekatan paling umum di EC2 adalah build image LANGSUNG di Instance atau via script.
+
+      - name: Deploy to AWS EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/Bersih.in || exit
+            # Update code
+            git pull origin main
+
+            # Rename .env via secret
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+            echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+            echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
+            echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env
+
+            # Build & Restart Docker container
+            docker-compose down || true
+            docker build -t bersih-in-app .
+
+            # Jalankan container baru
+            # Sesuaikan port jika diperlukan (penerusan port 80 -> 3000)
+            docker run -d --name bersih-in-app -p 80:3000 --restart unless-stopped \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}" \
+              bersih-in-app
+
+            # Jalankan migrasi Prisma (Opsional, tapi direkomendasikan)
+            docker exec bersih-in-app npx prisma migrate deploy
